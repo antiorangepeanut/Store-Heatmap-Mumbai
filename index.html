@@ -36,19 +36,21 @@ details ul{margin:4px 0 0;padding-left:16px;color:#555}
 <div id="panel" style="display:none">
 <h1>Mumbai sales heatmap</h1>
 <div class="seg" id="view">
- <button data-v="online" class="on">Online</button><button data-v="stores">Stores</button><button data-v="both">Both</button>
+ <button data-v="online" class="on">Online</button><button data-v="stores">Stores</button><button data-v="both">Both</button><button data-v="beyond">Beyond Website</button>
 </div>
 <div id="tot" style="color:#555;margin-top:8px;line-height:1.5"></div>
 
 <div class="sec" id="storeopts">
  <h2><span class="sw" style="background:#e8590c"></span>Store sales (Excel)</h2>
+ <label>Distributor
+  <select id="dist"><option value="all" selected>All</option></select></label>
  <label>Measure
   <select id="met"><option value="s" selected>Secondary (distributor → store)</option><option value="t">Tertiary (store → customer)</option></select></label>
  <label>Period
   <select id="per"><option value="all" selected>All (Apr–Oct '26)</option><option value="0">Apr'26</option><option value="1">May'26</option><option value="2">Jun'26</option><option value="3">Jul'26</option><option value="4">Aug'26</option><option value="5">Sep'26</option><option value="6">Oct'26</option></select></label>
 </div>
 
-<div class="sec">
+<div class="sec" id="dispopts">
  <h2>Display</h2>
  <label>Heat radius: <span id="rv">2.00</span> km<input id="rad" type="range" min="0.5" max="6" step="0.25" value="2"></label>
  <label>Opacity<input id="op" type="range" min="0.2" max="1" step="0.05" value="0.75"></label>
@@ -58,6 +60,7 @@ details ul{margin:4px 0 0;padding-left:16px;color:#555}
  <select id="scl"><option value="linear" selected>Linear (true proportions)</option><option value="sqrt">Square root</option><option value="log">Log (reveals low-volume areas)</option></select></label>
  <label id="ptsl"><input id="pts" type="checkbox" checked> Show pincode markers (online)</label>
  <label id="stsl"><input id="sts" type="checkbox" checked> Show store markers (incl. stores with no sales)</label>
+ <label id="bysl"><input id="bys" type="checkbox" checked> Show Beyond Website locations</label>
 </div>
 
 <div class="sec" id="legends"></div>
@@ -67,14 +70,15 @@ details ul{margin:4px 0 0;padding-left:16px;color:#555}
 const HARDCODED_KEY="AIzaSyDllgorGZk08xTgIOR5E49EWt6BjNTq_Ss";
 const DATA=[{"pin": "400002", "name": "Kalbadevi", "q": 1, "lat": 18.94553, "lon": 72.82864}, {"pin": "400003", "name": "Mandvi S.O (Mumbai)", "q": 2, "lat": 18.96339, "lon": 72.8273}, {"pin": "400004", "name": "Charni Road", "q": 1, "lat": 18.95543, "lon": 72.81939}, {"pin": "400005", "name": "Colaba Bazar", "q": 2, "lat": 18.91091, "lon": 72.81167}, {"pin": "400007", "name": "Grant Road", "q": 6, "lat": 18.95989, "lon": 72.8155}, {"pin": "400008", "name": "Mumbai Central", "q": 2, "lat": 18.96775, "lon": 72.82756}, {"pin": "400009", "name": "CHINCHBUNDER", "q": 2, "lat": 18.96403, "lon": 72.84083}, {"pin": "400010", "name": "Dockyard Road", "q": 8, "lat": 18.97117, "lon": 72.84067}, {"pin": "400011", "name": "Jacob Circle", "q": 1, "lat": 18.97692, "lon": 72.82431}, {"pin": "400012", "name": "BEST STaff Quarters", "q": 11, "lat": 19.00092, "lon": 72.83836}, {"pin": "400013", "name": "Delisle Road", "q": 4, "lat": 18.9965, "lon": 72.82561}, {"pin": "400014", "name": "Dadar", "q": 6, "lat": 19.01603, "lon": 72.84601}, {"pin": "400015", "name": "Sewri", "q": 2, "lat": 18.97717, "lon": 72.84942}, {"pin": "400016", "name": "Mahim", "q": 4, "lat": 19.03403, "lon": 72.84253}, {"pin": "400017", "name": "Dharavi Road", "q": 5, "lat": 19.04233, "lon": 72.85174}, {"pin": "400018", "name": "Worli", "q": 1, "lat": 19.00985, "lon": 72.81807}, {"pin": "400022", "name": "Sion", "q": 3, "lat": 19.04998, "lon": 72.8655}, {"pin": "400024", "name": "Nehru Nagar", "q": 5, "lat": 19.05895, "lon": 72.88067}, {"pin": "400025", "name": "New Prabhadevi Road", "q": 2, "lat": 19.01051, "lon": 72.82856}, {"pin": "400026", "name": "Dr Deshmukh Marg", "q": 3, "lat": 18.96904, "lon": 72.80692}, {"pin": "400027", "name": "V J B Udyan", "q": 1, "lat": 18.97669, "lon": 72.83194}, {"pin": "400028", "name": "Bhawani Shankar Rd", "q": 6, "lat": 19.02206, "lon": 72.83889}, {"pin": "400030", "name": "Century Mill", "q": 3, "lat": 19.0166, "lon": 72.81711}, {"pin": "400033", "name": "Cotton Exchange", "q": 5, "lat": 18.98519, "lon": 72.837}, {"pin": "400034", "name": "Haji Ali", "q": 1, "lat": 18.97705, "lon": 72.81712}, {"pin": "400037", "name": "C G S Colony", "q": 9, "lat": 19.02414, "lon": 72.86331}, {"pin": "400042", "name": "Bhandup East", "q": 12, "lat": 19.14211, "lon": 72.93919}, {"pin": "400043", "name": "DM Colony", "q": 4, "lat": 19.01047, "lon": 72.87354}, {"pin": "400049", "name": "Juhu", "q": 4, "lat": 19.11097, "lon": 72.8255}, {"pin": "400050", "name": "Bandra West", "q": 4, "lat": 19.05689, "lon": 72.83419}, {"pin": "400051", "name": "Bandra(East)", "q": 8, "lat": 19.05809, "lon": 72.84556}, {"pin": "400052", "name": "Khar Colony", "q": 5, "lat": 19.06823, "lon": 72.83603}, {"pin": "400053", "name": "Andheri", "q": 4, "lat": 19.04582, "lon": 72.82624}, {"pin": "400054", "name": "Santacruz Central", "q": 6, "lat": 19.08744, "lon": 72.83683}, {"pin": "400055", "name": "Vakola", "q": 9, "lat": 19.08136, "lon": 72.84867}, {"pin": "400056", "name": "Vileparle(West)", "q": 1, "lat": 19.10335, "lon": 72.83943}, {"pin": "400057", "name": "Hanuman Road", "q": 6, "lat": 19.10344, "lon": 72.84717}, {"pin": "400058", "name": "Andheri Railway Station", "q": 9, "lat": 19.12358, "lon": 72.83942}, {"pin": "400059", "name": "Marol Naka", "q": 10, "lat": 19.11617, "lon": 72.88261}, {"pin": "400060", "name": "Jogeshwari East", "q": 9, "lat": 19.13144, "lon": 72.85014}, {"pin": "400063", "name": "Goregaon East", "q": 6, "lat": 19.15892, "lon": 72.85146}, {"pin": "400064", "name": "Liberty Garden", "q": 15, "lat": 19.18701, "lon": 72.84506}, {"pin": "400065", "name": "Aareymilk Colony", "q": 6, "lat": 19.15375, "lon": 72.87778}, {"pin": "400066", "name": "Daulat Nagar SO Mumbai", "q": 26, "lat": 19.23357, "lon": 72.85874}, {"pin": "400067", "name": "Charkop", "q": 34, "lat": 19.21331, "lon": 72.84044}, {"pin": "400068", "name": "Dahisar RS", "q": 32, "lat": 19.24806, "lon": 72.86057}, {"pin": "400069", "name": "Nagardas Road", "q": 4, "lat": 19.11971, "lon": 72.84971}, {"pin": "400070", "name": "Kurla North", "q": 10, "lat": 19.06818, "lon": 72.87784}, {"pin": "400071", "name": "Chembur", "q": 18, "lat": 19.05689, "lon": 72.89811}, {"pin": "400072", "name": "Sakinaka", "q": 10, "lat": 19.11102, "lon": 72.89034}, {"pin": "400074", "name": "FCI", "q": 7, "lat": 19.04564, "lon": 72.89472}, {"pin": "400075", "name": "RANagar", "q": 16, "lat": 19.08436, "lon": 72.91806}, {"pin": "400076", "name": "Powai Iit", "q": 6, "lat": 19.12869, "lon": 72.91919}, {"pin": "400077", "name": "Rajawadi", "q": 2, "lat": 19.07922, "lon": 72.90219}, {"pin": "400078", "name": "Usha Nagar", "q": 36, "lat": 19.14956, "lon": 72.93464}, {"pin": "400079", "name": "Psm Colony", "q": 3, "lat": 19.10574, "lon": 72.92329}, {"pin": "400080", "name": "Nehru Road SO Mumbai", "q": 21, "lat": 19.17481, "lon": 72.95167}, {"pin": "400081", "name": "Mulund East", "q": 11, "lat": 19.1691, "lon": 72.9634}, {"pin": "400082", "name": "Bhandup Complex", "q": 4, "lat": 19.17092, "lon": 72.93306}, {"pin": "400083", "name": "Tagore Nagar", "q": 22, "lat": 19.11651, "lon": 72.93725}, {"pin": "400084", "name": "Barve Nagar", "q": 7, "lat": 19.09822, "lon": 72.90433}, {"pin": "400086", "name": "Ghatkopar West", "q": 6, "lat": 19.08633, "lon": 72.90822}, {"pin": "400088", "name": "Govandi", "q": 7, "lat": 19.04503, "lon": 72.91689}, {"pin": "400089", "name": "Chembur Rs", "q": 12, "lat": 19.01561, "lon": 72.86169}, {"pin": "400091", "name": "Borivali", "q": 13, "lat": 19.23189, "lon": 72.84044}, {"pin": "400092", "name": "Borivali West", "q": 11, "lat": 19.22911, "lon": 72.85531}, {"pin": "400093", "name": "Chakala Midc", "q": 5, "lat": 19.12114, "lon": 72.87122}, {"pin": "400094", "name": "Anushakti Nagar", "q": 4, "lat": 19.03825, "lon": 72.92525}, {"pin": "400095", "name": "Kharodi", "q": 13, "lat": 19.19224, "lon": 72.80903}, {"pin": "400097", "name": "Rani Sati Marg", "q": 21, "lat": 19.18213, "lon": 72.85082}, {"pin": "400098", "name": "Vidyanagari", "q": 1, "lat": 19.07997, "lon": 72.8545}, {"pin": "400099", "name": "International Airport", "q": 1, "lat": 19.095, "lon": 72.86204}, {"pin": "400101", "name": "Kandivali East", "q": 19, "lat": 19.20819, "lon": 72.86986}, {"pin": "400102", "name": "Jogeshwari West", "q": 10, "lat": 19.13931, "lon": 72.85257}, {"pin": "400103", "name": "Mandapeshwar", "q": 6, "lat": 19.24547, "lon": 72.86392}, {"pin": "400104", "name": "Motilal Nagar", "q": 40, "lat": 19.16686, "lon": 72.83686}, {"pin": "400601", "name": "Thane", "q": 24, "lat": 19.19292, "lon": 72.97744}, {"pin": "400602", "name": "Naupada S.O (Thane)", "q": 7, "lat": 19.21646, "lon": 72.91725}, {"pin": "400603", "name": "Kopri Colony", "q": 3, "lat": 19.18313, "lon": 72.97615}, {"pin": "400604", "name": "Wagle I.E.", "q": 9, "lat": 19.18606, "lon": 72.95778}, {"pin": "400605", "name": "Kalwa", "q": 15, "lat": 19.19347, "lon": 72.98983}, {"pin": "400606", "name": "Jekegram", "q": 12, "lat": 19.20603, "lon": 72.96694}, {"pin": "400607", "name": "Chitalsar Manpada", "q": 51, "lat": 19.23813, "lon": 72.98568}, {"pin": "400608", "name": "Tapasenagar", "q": 10, "lat": 19.21834, "lon": 72.97808}, {"pin": "400610", "name": "Apna Bazar", "q": 18, "lat": 19.23125, "lon": 72.97378}, {"pin": "400612", "name": "Dahisar", "q": 23, "lat": 19.17856, "lon": 73.0384}, {"pin": "400614", "name": "Belapur Node   III", "q": 13, "lat": 19.02456, "lon": 73.04494}, {"pin": "400615", "name": "Ghodbunder Road", "q": 46, "lat": 19.27062, "lon": 72.95811}, {"pin": "400701", "name": "Ghansoli", "q": 16, "lat": 19.12439, "lon": 72.99761}, {"pin": "400702", "name": "Bokadvira", "q": 1, "lat": 18.87723, "lon": 72.92833}, {"pin": "400703", "name": "Turbhe Market", "q": 3, "lat": 19.076, "lon": 73.00682}, {"pin": "400705", "name": "Sanpada", "q": 12, "lat": 19.07186, "lon": 73.00744}, {"pin": "400706", "name": "Darave", "q": 25, "lat": 19.03751, "lon": 73.0176}, {"pin": "400707", "name": "Navghar", "q": 1, "lat": 18.87, "lon": 72.92}, {"pin": "400708", "name": "Airoli", "q": 9, "lat": 19.15115, "lon": 72.99232}, {"pin": "400709", "name": "Kopar Khairne", "q": 7, "lat": 19.1035, "lon": 73.00442}, {"pin": "400710", "name": "Millenium Business Park", "q": 1, "lat": 19.11006, "lon": 73.0175}, {"pin": "401101", "name": "Rai", "q": 16, "lat": 19.29918, "lon": 72.836}, {"pin": "401105", "name": "Bhayander East", "q": 21, "lat": 19.30964, "lon": 72.85497}, {"pin": "401107", "name": "Kashi", "q": 84, "lat": 19.27628, "lon": 72.88442}, {"pin": "401201", "name": "Bhuigaon", "q": 9, "lat": 19.36664, "lon": 72.79932}, {"pin": "401202", "name": "Umela", "q": 7, "lat": 19.37892, "lon": 72.83235}, {"pin": "401203", "name": "Gass", "q": 26, "lat": 19.41773, "lon": 72.7979}, {"pin": "401207", "name": "Naigaon", "q": 3, "lat": 19.3483, "lon": 72.81895}, {"pin": "401208", "name": "Gokhiware", "q": 34, "lat": 19.40053, "lon": 72.86464}, {"pin": "401209", "name": "Nallosapare E", "q": 21, "lat": 19.42539, "lon": 72.82742}, {"pin": "401301", "name": "Agashi", "q": 3, "lat": 19.46092, "lon": 72.77667}, {"pin": "401303", "name": "Bolinj", "q": 34, "lat": 19.46559, "lon": 72.88515}, {"pin": "401305", "name": "Virar East", "q": 5, "lat": 19.46872, "lon": 72.81669}, {"pin": "401402", "name": "Kelwa mahim", "q": 1, "lat": 19.64614, "lon": 72.72369}, {"pin": "401404", "name": "Palghar", "q": 3, "lat": 19.69828, "lon": 72.76892}, {"pin": "401501", "name": "Dandi", "q": 7, "lat": 19.79035, "lon": 72.76067}, {"pin": "410206", "name": "Kelevane", "q": 48, "lat": 18.96, "lon": 73.11039}, {"pin": "410208", "name": "Wawanje", "q": 2, "lat": 19.0423, "lon": 73.09435}, {"pin": "410209", "name": "KAMOTHE", "q": 5, "lat": 19.016, "lon": 73.096}, {"pin": "410210", "name": "Kharghar", "q": 17, "lat": 19.0135, "lon": 73.17106}, {"pin": "410218", "name": "Kalamboli Node", "q": 9, "lat": 19.02672, "lon": 73.10481}, {"pin": "421002", "name": "Bus Terminus", "q": 3, "lat": 19.23547, "lon": 73.16178}, {"pin": "421005", "name": "Ulhasnagar 5", "q": 1, "lat": 19.19864, "lon": 73.16089}, {"pin": "421101", "name": "Padgha", "q": 1, "lat": 19.36653, "lon": 73.17464}, {"pin": "421201", "name": "Thakurli", "q": 2, "lat": 19.21199, "lon": 73.08665}, {"pin": "421204", "name": "Khoni", "q": 7, "lat": 19.1728, "lon": 73.06866}, {"pin": "421303", "name": "Abitghar", "q": 1, "lat": 19.6591, "lon": 73.14485}, {"pin": "421306", "name": "Wadi", "q": 2, "lat": 19.21747, "lon": 73.16952}, {"pin": "421308", "name": "Bhiwandi", "q": 1, "lat": 19.181, "lon": 73.08189}, {"pin": "421311", "name": "Kon", "q": 3, "lat": 19.25764, "lon": 73.07446}, {"pin": "421503", "name": "Badlapur E.D.", "q": 1, "lat": 19.15001, "lon": 73.26665}, {"pin": "421506", "name": "Additional Ambernath", "q": 1, "lat": 19.18819, "lon": 73.19144}, {"pin": "421605", "name": "Khadavali", "q": 3, "lat": 19.2683, "lon": 73.16551}];
 const STORES=[{"name": "Alliance Electric mart", "status": "Exact", "dist": "Pratik Distributors", "pin": "400002", "area": "Lohar Chawl", "s": [23.03, 50.0, 67.0, 75.0, 75.0, 31.0, 61.0], "t": [6.0, 0.0, 7.0, 60.0, 36.0, 22.0, 35.0], "note": ""}, {"name": "Snehanjali Electronics", "status": "Close", "dist": "Agrawal Crockery NX", "pin": "401107", "area": "Mira Road", "s": [15.28, 9.0, 23.0, 30.0, 20.0, 45.0, 60.0], "t": [0.0, 0.0, 0.0, 21.0, 20.0, 43.0, 36.0], "note": "All Snehanjali entries combined: tracker has 2 rows (Agrawal Crockery NX + Pratik Distributors, Mira Road); both summed here"}, {"name": "Shreeji Enterprises", "status": "Exact", "dist": "Jai Enterprises", "pin": "400601", "area": "Thane", "s": [10.07, 2.0, 35.0, 0.0, 26.0, 30.0, 45.0], "t": [0.0, 0.0, 1.0, 30.0, 20.0, 21.0, 10.0], "note": ""}, {"name": "Bhawal Electronics", "status": "Close", "dist": "Pratik Distributors", "pin": "400012", "area": "Parel", "s": [0.0, 7.0, 15.0, 17.0, 15.0, 20.0, 10.0], "t": [0.0, 5.0, 11.0, 13.0, 14.0, 16.0, 5.0], "note": "Tracker spells it \"Bhaval\"; 3 outlets"}, {"name": "Shree Arham Home Appliances", "status": "Close", "dist": "Pratik Distributors", "pin": "400058", "area": "Andheri", "s": [0.0, 4.0, 15.0, 7.0, 10.0, 30.0, 10.0], "t": [0.0, 0.0, 2.0, 4.0, 9.0, 17.0, 9.0], "note": "Tracker spells it \"Applainces\""}, {"name": "Alfa Market Irla", "status": "Probable", "dist": "Pratik Distributors", "pin": "400056", "area": "Vile Parle (Irla)", "s": [5.18, 7.0, 14.0, 2.0, 4.0, 20.0, 3.0], "t": [2.0, 0.0, 0.0, 2.0, 3.0, 14.0, 2.0], "note": "Tracker lists \"Alfa\" at Vile Parle (Irla is in Vile Parle) - please confirm"}, {"name": "Golden Steel & Appliances | Manpada", "status": "Close", "dist": "Jai Enterprises", "pin": "400607", "area": "Manpada, Thane", "s": [11.49, 0.0, 17.0, 0.0, 0.0, 0.0, 11.0], "t": [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 17.0], "note": "Manpada is in Thane; tracker lists Thane"}, {"name": "Ambika Home Applainces", "status": "Close", "dist": "Agrawal Crockery NX", "pin": "401101", "area": "Bhayander", "s": [0.0, 4.0, 0.0, 10.0, 10.0, 0.0, 8.0], "t": [0.0, 4.0, 10.0, 6.0, 7.0, 0.0, 6.0], "note": "Tracker has the longer name (Bhayender)"}, {"name": "Oswal appliances", "status": "Exact", "dist": "Square Trade", "pin": "400092", "area": "Borivali", "s": [0.0, 4.0, 0.0, 2.0, 5.0, 2.0, 5.0], "t": [0.0, 0.0, 2.0, 2.0, 5.0, 1.0, 0.0], "note": ""}, {"name": "Manibhadra Electricals & Home Appliances", "status": "Close", "dist": "Janata Sales", "pin": "400601", "area": "Thane", "s": [0.0, 0.0, 0.0, 0.0, 0.0, 4.0, 14.0], "t": [0, 0, 0, 0, 0.0, 2.0, 0.0], "note": "2 tracker rows (Manibhadra + Manibhdra Elec-, Janata Sales) summed. Not listed in Tertiary sheet (Apr-Jul)"}, {"name": "Sam Appliances & Electronics", "status": "Close", "dist": "Janata Sales", "pin": "400601", "area": "Thane", "s": [0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 9.0], "t": [0, 0, 0, 0, 0.0, 3.0, 1.0], "note": "2 tracker rows (Sam Appliances + Sam App-, Janata Sales) summed. Not listed in Tertiary sheet (Apr-Jul)"}, {"name": "Mahipal Steel & Appliances", "status": "Exact", "dist": "Pratik Distributors", "pin": "400014", "area": "Dadar", "s": [0.0, 2.0, 2.0, 1.0, 3.0, 0.0, 3.0], "t": [0.0, 0.0, 11.0, 1.0, 3.0, 0.0, 3.0], "note": ""}, {"name": "Mahavir Home Store", "status": "Exact", "dist": "Agrawal Crockery NX", "pin": "400054", "area": "Santacruz", "s": [0.0, 4.0, 0.0, 1.0, 3.0, 0.0, 2.0], "t": [0.0, 2.0, 5.0, 1.0, 3.0, 0.0, 2.0], "note": "Tracker has 2 Mahavir Home Store rows; used Pratik Distributors / Santacruz, ignored Agrawal Crockery NX / Virar"}, {"name": "Sankpal Enterprises", "status": "Exact", "dist": "Square Trade", "pin": "400101", "area": "Kandivali", "s": [0.0, 4.0, 1.0, 0.0, 0.0, 0.0, 5.0], "t": [0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0], "note": ""}, {"name": "Crystal Kitchen", "status": "Exact", "dist": "Pratik Distributors", "pin": "400071", "area": "Chembur", "s": [6.09, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "t": [1.0, 1.0, 11.0, 0.0, 0.0, 0.0, 0.0], "note": "Chembur"}, {"name": "Satyam Sales & Services", "status": "Close", "dist": "Square Trade", "pin": "400101", "area": "Kandivali", "s": [0.0, 3.0, 0.0, 0.0, 0.0, 2.0, 0.0], "t": [0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0], "note": "Kandivali"}, {"name": "Shree Balaji Steel", "status": "Probable", "dist": "Jai Enterprises", "pin": "400601", "area": "Thane", "s": [0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0], "t": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], "note": "Tracker name is \"Balaji Steel\" (Thane) - please confirm"}, {"name": "Fenchi Electronics", "status": "Probable", "dist": "Pratik Distributors", "pin": "400050", "area": "Bandra", "s": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0], "t": [0, 0, 0, 0, 0.0, 0.0, 0.0], "note": "Tracker name is \"A FENCHI NOVELTY\" (Bandra) - please confirm. Not listed in Tertiary sheet (Apr-Jul)"}, {"name": "Pankaj Appliances", "status": "New", "dist": "", "pin": "", "area": "Dombivali", "ll": [19.220024, 73.086504], "st": 116, "tt": 77, "note": "Added from \"Add stores\" sheet \u2013 totals only (no monthly split; shown in the \"All\" period only)"}, {"name": "Laxmi Crockery", "status": "New", "dist": "", "pin": "", "area": "Ulhasnagar", "ll": [19.234156, 73.163574], "st": 109, "tt": 53, "note": "Added from \"Add stores\" sheet \u2013 totals only (no monthly split; shown in the \"All\" period only)"}, {"name": "Maru Appliances", "status": "New", "dist": "", "pin": "", "area": "Dombivali", "ll": [19.219226, 73.090265], "st": 97, "tt": 67, "note": "Added from \"Add stores\" sheet \u2013 totals only (no monthly split; shown in the \"All\" period only)"}, {"name": "Prabhat Kitchen", "status": "New", "dist": "", "pin": "", "area": "Kalyan", "ll": [19.255229, 73.141813], "st": 87.06, "tt": 46, "note": "Added from \"Add stores\" sheet \u2013 totals only (no monthly split; shown in the \"All\" period only)"}, {"name": "Prabhat Appliances", "status": "New", "dist": "", "pin": "", "area": "Kalyan", "ll": [19.24304, 73.126221], "st": 50.26, "tt": 28, "note": "Added from \"Add stores\" sheet \u2013 totals only (no monthly split; shown in the \"All\" period only)"}, {"name": "Decure Connect Pvt Ltd", "status": "New", "dist": "", "pin": "", "area": "Andheri", "ll": [19.103769, 72.882489], "st": 21, "tt": 5, "note": "Added from \"Add stores\" sheet \u2013 totals only (no monthly split; shown in the \"All\" period only)"}];
-let map,overlayCanvas,markers=[],smarkers=[],info;
+const BEYOND_STORES=[{"name":"Shree Arham Home Appliances","pincode":400058,"lat":19.1182576,"lng":72.84595461,"address":"Laram Centre,B121/112/117,M A Road,Opp Railway Station,Andheri West","exclusive":true},{"name":"Fenchi Electronics","pincode":400051,"lat":19.06137503,"lng":72.84447378,"address":"Shop No 16, Building No 35, Near Ram Mandir & Shiv Sena Shaka, Kher Nagar Road, Bandra East","exclusive":false},{"name":"GUNJAN TIME","pincode":400054,"lat":19.08120978,"lng":72.84116281,"address":"Shop No 3 & 4, Shiv Darshan Shopping Centre, Opposite Railway Station, M G Road, Santacruz West","exclusive":false},{"name":"Mahavir Home Store","pincode":400054,"lat":19.08119369,"lng":72.84056113,"address":"Matcheswala Compound, Railway Colony, Santacruz (West)","exclusive":false},{"name":"Alfa Market Irla","pincode":400056,"lat":19.10859916,"lng":72.83932398,"address":"ONGC Colony, Tata Colony, Vile Parle West","exclusive":true},{"name":"Sony Mony Electronics Ltd","pincode":400058,"lat":19.12674674,"lng":72.83797265,"address":"Shreeji Apartment, JP Rd, Sahayog Society, Munshi Nagar, Andheri West","exclusive":false},{"name":"Kalpana Novelty Store","pincode":400053,"lat":19.12774751,"lng":72.83422887,"address":"JP Rd, opp. A.H.Wadia High School, Dhake Colony, Azad Nagar, Andheri West","exclusive":false},{"name":"Beyond x Design Cafe - Andheri","pincode":400102,"lat":19.15172814,"lng":72.83401261,"address":"Ground Floor, Vicino Mall, Oshiwara, Andheri West","exclusive":true},{"name":"Sankpal Enterprises","pincode":400067,"lat":19.21053511,"lng":72.83015441,"address":"Shop No . 17, ROCK ENCLAVE, Charkop, Sahyadri Nagar, Kandivali West","exclusive":false},{"name":"Snehanjali Electronics","pincode":400067,"lat":19.19937725,"lng":72.84830079,"address":"4, Heena Gaurav Heights, S. V. Road, Kandivali West","exclusive":true},{"name":"Satyam Sales & Services","pincode":400101,"lat":19.21061825,"lng":72.87397544,"address":"44, Emp Building, Phase 1, Thakur Village, Kandivali East","exclusive":false},{"name":"S Chetan Sales & Service - Kitchen Appliance Shop","pincode":400101,"lat":19.21236903,"lng":72.86763773,"address":"Shop Number 1&2, Pushpanjali Asha Nagar, Bihand Sai Dham, Thakur Complex,Kand, Kandivali East","exclusive":false},{"name":"NAVDEEP ENTERPRISES","pincode":400066,"lat":19.22883413,"lng":72.85979756,"address":"Shop no.4, Rakhi Tower, Kasturba, Cross Road No. 3, Borivali East","exclusive":false},{"name":"Oswal appliances","pincode":400092,"lat":19.22929501,"lng":72.84829718,"address":"West Apartment,Bhabhai naka, Borivali West","exclusive":false},{"name":"Snehaanjali Electronics Dahisar","pincode":400068,"lat":19.25043555,"lng":72.85887282,"address":"Shop No. 8 to 14, Pokar Kunj, CHS LTD, LT Rd, Mhatre Wadi, Dahisar West","exclusive":false},{"name":"Snehanjali Electronics 2","pincode":401107,"lat":19.28373039,"lng":72.86474137,"address":"nr. Rasaz Multiplex, Sheetal Nagar, Mira Road East, Thane","exclusive":false},{"name":"Ambika Home Applainces","pincode":401105,"lat":19.30628662,"lng":72.8569322,"address":"Opp. Sai Hospital Bhayandar, Shalibhadra Nagar","exclusive":false},{"name":"Crystal Kitchen","pincode":400071,"lat":19.05385041,"lng":72.89596787,"address":"Shop Number 7, Rajasthan Complex, Charai, Chembur","exclusive":false},{"name":"Kohinoor Electronics.","pincode":400071,"lat":19.05415418,"lng":72.88540831,"address":"Near Swastik Park, Suman Nagar, Sion Trombay Road, Chembur East","exclusive":false},{"name":"Mahipal Steel & Appliances","pincode":400028,"lat":19.01833669,"lng":72.83963834,"address":"Kings Krest, Near Kabutar khana, Dadar West, Dadar","exclusive":false},{"name":"KOHINOOR ELECTRONICS","pincode":400014,"lat":19.01501731,"lng":72.8452449,"address":"Opp. Fire Brigade, Dadar East, Dadar","exclusive":false},{"name":"Bhawal Electronics","pincode":400012,"lat":19.00652976,"lng":72.84564437,"address":"Govindji Keni Rd, Parel Bhoiwada, Police Colony, Naigaon, Parel","exclusive":false},{"name":"Alliance Electric mart","pincode":400002,"lat":18.94718033,"lng":72.83204977,"address":"Kantilal M Sharma St, Lohar Chawl, Kalbadevi","exclusive":true},{"name":"Kohinoor Electronics","pincode":400703,"lat":19.08389517,"lng":73.00645004,"address":"Palm Beach Rd, Phase 2, Sector 19D, Vashi","exclusive":false},{"name":"Shreeji Enterprises","pincode":400602,"lat":19.18854006,"lng":72.97438367,"address":"Shop No.1, Naik Wadi, Naupada, Thane West","exclusive":true},{"name":"Jyoti Kitchen Galleria","pincode":400601,"lat":19.19502882,"lng":72.97814603,"address":"Ground Floor, Sodha Sadan, Netaji Subhash Chandra Rd, opp. Parekh Medical, Jambli Naka, Thane West, Mumbai","exclusive":false},{"name":"Manibhadra Electricals & Home Appliances","pincode":400601,"lat":19.19549904,"lng":72.9782278,"address":"Shop no 1 Dattaguru Housing soct ltdThnae Jambli Naka","exclusive":false},{"name":"Shree Balaji Steel","pincode":400601,"lat":19.19536881,"lng":72.97793506,"address":"Neta ji Subhash Chandra Rd opp Popular cycles Jambli Naka Thane west","exclusive":false},{"name":"Sam Appliances & Electronics","pincode":400601,"lat":19.19583281,"lng":72.97696317,"address":"Shop No. 1/2, Arihant Apts, Agyari Ln, next to Kotak Mahindra Bank, Jambli Naka, Thane West","exclusive":false},{"name":"Beyond x Design Cafe - Thane","pincode":400601,"lat":19.23284081,"lng":72.97574467,"address":"Shop No-11, Dosti Imperia, opposite R-Mall, Manpada, Thane West","exclusive":true},{"name":"Golden Steel & Appliances | Manpada","pincode":400610,"lat":19.23654456,"lng":72.96955308,"address":"Kothari Compound, Hill Garden, Kokanipada, Thane West","exclusive":true}];
+
+let map,overlayCanvas,markers=[],smarkers=[],beyondMarkers=[],info;
 const PINXY={};DATA.forEach(d=>PINXY[d.pin]=d);
 const total=DATA.reduce((s,d)=>s+d.q,0);
 function go(){const k=HARDCODED_KEY||document.getElementById('key').value.trim();if(!k)return;
  const s=document.createElement('script');s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(k)+'&callback=initMap&loading=async';s.async=true;document.head.appendChild(s);}
 if(HARDCODED_KEY)go();
 
-// ---- colour ramps (online keeps the original palette; in "Both" it switches to a cool ramp so it contrasts with the warm store ramp)
 const RAMPS={
  orig:{stops:[[0,'rgba(43,131,186,0)'],[.15,'rgba(43,131,186,.8)'],[.35,'#abdda4'],[.55,'#ffffbf'],[.78,'#fdae61'],[1,'#d7191c']],css:'linear-gradient(90deg,#2b83ba,#abdda4,#ffffbf,#fdae61,#d7191c)'},
  cool:{stops:[[0,'rgba(0,214,255,0)'],[.15,'rgba(0,214,255,.8)'],[.5,'#1f78e0'],[1,'#1b1464']],css:'linear-gradient(90deg,#00d6ff,#1f78e0,#1b1464)'},
@@ -84,14 +88,26 @@ function mkLUT(stops){const c=document.createElement('canvas');c.width=256;c.hei
  stops.forEach(a=>g.addColorStop(a[0],a[1]));x.fillStyle=g;x.fillRect(0,0,256,1);return x.getImageData(0,0,256,1).data;}
 Object.values(RAMPS).forEach(r=>r.lut=mkLUT(r.stops));
 
-// ---- state
 let view='online';
 const $=id=>document.getElementById(id);
+
+function getFilteredStores() {
+  const dist = $('dist').value;
+  return STORES.filter(s => dist === 'all' || s.dist === dist);
+}
 function storeVal(s){const m=$('met').value,p=$('per').value;if(!s.s)return p==='all'?(m==='s'?s.st:s.tt):0;const a=s[m];return p==='all'?a.reduce((x,y)=>x+y,0):a[+p];}
 const sPos=s=>s.ll?{lat:s.ll[0],lon:s.ll[1]}:(PINXY[s.pin]||null);
 const sTot=(s,k)=>s[k]?s[k].reduce((a,b)=>a+b,0):(k==='s'?s.st:s.tt);
-function storePoints(){ // aggregate placed stores by pincode
- const agg={};STORES.forEach(s=>{const p=sPos(s);if(!p)return;const v=storeVal(s);const k=s.ll?'ll'+s.ll:s.pin;const a=agg[k]||(agg[k]={lat:p.lat,lon:p.lon,q:0});a.q+=v;});
+
+function storePoints(){ 
+ const agg={};
+ getFilteredStores().forEach(s=>{
+  const p=sPos(s);if(!p)return;
+  const v=storeVal(s);
+  const k=s.ll?'ll'+s.ll:s.pin;
+  const a=agg[k]||(agg[k]={lat:p.lat,lon:p.lon,q:0});
+  a.q+=v;
+ });
  return Object.values(agg);
 }
 const MAXQ=Math.max(...DATA.map(d=>d.q));
@@ -106,10 +122,21 @@ function initMap(){
  const ov=new google.maps.OverlayView();ov.onAdd=function(){};ov.onRemove=function(){};ov.draw=function(){};ov.setMap(map);
  overlayCanvas=document.createElement('canvas');Object.assign(overlayCanvas.style,{position:'absolute',left:0,top:0,pointerEvents:'none',zIndex:1});
  map.getDiv().appendChild(overlayCanvas);
+ 
+ // Populate Distributor filter dropdown
+ const dSel = $('dist');
+ const dists = Array.from(new Set(STORES.map(s=>s.dist).filter(d=>d))).sort();
+ dists.forEach(d=>{
+  const opt = document.createElement('option');
+  opt.value = d;
+  opt.textContent = d;
+  dSel.appendChild(opt);
+ });
+
  DATA.forEach(d=>{const m=new google.maps.Marker({position:{lat:d.lat,lng:d.lon},map,title:d.pin,
   icon:{path:google.maps.SymbolPath.CIRCLE,scale:3+Math.sqrt(d.q)*0.9,fillOpacity:0,strokeColor:'#222',strokeWeight:1}});
   m.addListener('click',()=>{info.setContent('<b>'+d.pin+'</b> '+d.name+'<br>Online units: '+d.q);info.open(map,m);});markers.push(m);});
- // store markers: squares; filled = has sales, hollow = no sales. Stores sharing a pincode are fanned out slightly so each stays clickable.
+ 
  const seen={};
  STORES.forEach(s=>{const p=sPos(s);if(!p)return;const sk=s.ll?'ll'+s.ll:s.pin;const k=seen[sk]=(seen[sk]||0)+1;
   const ang=(k-1)*2.4,rad=k===1?0:0.0035*Math.sqrt(k);
@@ -119,38 +146,73 @@ function initMap(){
   m.addListener('click',()=>{const sv=sTot(s,'s'),tv=sTot(s,'t');
    info.setContent('<b>'+s.name+'</b><br>'+(s.dist?s.dist+'<br>':'')+(s.pin?'Pincode '+s.pin+' ('+PINXY[s.pin].name+') · ':'')+s.area+
     '<br>Secondary: <b>'+fmt(sv)+'</b> · Tertiary: <b>'+fmt(tv)+'</b> (Apr–Oct)'+
-    
     '<br><span style="color:#777;font-size:11px">'+s.status+(s.note?' – '+s.note:'')+'</span>');info.open(map,m);});
   smarkers.push(m);});
+  
+ BEYOND_STORES.forEach(b=>{
+  const m=new google.maps.Marker({position:{lat:b.lat,lng:b.lng},map,title:b.name,zIndex:100,
+   icon:{path:google.maps.SymbolPath.CIRCLE,scale:7,fillOpacity:1,fillColor:b.exclusive?'#9c27b0':'#4caf50',strokeColor:'#fff',strokeWeight:2}});
+  m.addListener('click',()=>{info.setContent('<b>'+b.name+'</b><br>'+b.address+'<br>Pincode: '+b.pincode+(b.exclusive?'<br><b>Exclusive</b>':''));info.open(map,m);});
+  beyondMarkers.push(m);
+ });
+
  const draw=()=>render(ov);
  ['bounds_changed','zoom_changed','idle'].forEach(e=>map.addListener(e,draw));
- ['rad','op','ovl','scl','met','per'].forEach(id=>$(id).addEventListener('input',()=>{$('rv').textContent=(+$('rad').value).toFixed(2);draw();}));
- $('pts').addEventListener('change',applyMarkers);$('sts').addEventListener('change',applyMarkers);
+ 
+ // UI Event Bindings
+ $('rad').addEventListener('input', () => { $('rv').textContent=(+$('rad').value).toFixed(2); draw(); });
+ ['op','ovl','scl'].forEach(id=>$(id).addEventListener('input', draw));
+ ['met','per','dist'].forEach(id=>$(id).addEventListener('input', () => { applyView(); draw(); }));
+ $('pts').addEventListener('change', applyMarkers);
+ $('sts').addEventListener('change', applyMarkers);
+ $('bys').addEventListener('change', () => { applyView(); draw(); });
+
  document.querySelectorAll('#view button').forEach(b=>b.addEventListener('click',()=>{view=b.dataset.v;
   document.querySelectorAll('#view button').forEach(x=>x.classList.toggle('on',x===b));applyView();draw();}));
- // list of stores that could not be placed
- const b=new google.maps.LatLngBounds();DATA.filter(d=>d.lat<19.35).forEach(d=>b.extend({lat:d.lat,lng:d.lon}));map.fitBounds(b);
+ 
+ const bnd=new google.maps.LatLngBounds();DATA.filter(d=>d.lat<19.35).forEach(d=>bnd.extend({lat:d.lat,lng:d.lon}));map.fitBounds(bnd);
  applyView();
  google.maps.event.addListenerOnce(map,'idle',draw);
 }
+
 function applyMarkers(){
- const showO=view!=='stores'&&$('pts').checked,showS=view!=='online'&&$('sts').checked;
+ const showO=(view==='online'||view==='both')&&$('pts').checked;
+ const showS=(view==='stores'||view==='both')&&$('sts').checked;
+ const showB=(view==='beyond') || (view==='both' && $('bys').checked);
+ const selDist = $('dist').value;
+
  markers.forEach(m=>m.setVisible(showO));
- smarkers.forEach(m=>{const z=storeVal(m._s)===0;const ic=m.getIcon();
-  m.setIcon(Object.assign({},ic,{fillColor:'#a4001f',strokeColor:'#fff'}));m.setVisible(showS&&!z);});
+ smarkers.forEach(m=>{
+  const s = m._s;
+  const matchDist = selDist === 'all' || s.dist === selDist;
+  const z = storeVal(s) === 0;
+  const ic = m.getIcon();
+  m.setIcon(Object.assign({},ic,{fillColor:'#a4001f',strokeColor:'#fff'}));
+  m.setVisible(showS && matchDist && !z);
+ });
+ beyondMarkers.forEach(m=>m.setVisible(showB));
 }
+
 function applyView(){
- $('storeopts').style.display=view==='online'?'none':'block';
- $('ptsl').style.display=view==='stores'?'none':'block';
- $('stsl').style.display=view==='online'?'none':'block';
+ $('storeopts').style.display=(view==='stores'||view==='both')?'block':'none';
+ $('dispopts').style.display=view==='beyond'?'none':'block';
+ $('ptsl').style.display=(view==='online'||view==='both')?'block':'none';
+ $('stsl').style.display=(view==='stores'||view==='both')?'block':'none';
+ $('bysl').style.display=(view==='both')?'block':'none';
  $('unpl').style.display='none';
+ 
  const sp=storePoints(),stot=sp.reduce((a,b)=>a+b.q,0);
  let t='';
- if(view!=='stores')t+='<span class="sw" style="background:'+(view==='both'?'#1f78e0':'#2b83ba')+'"></span> Online: <b>'+total.toLocaleString()+'</b> units · '+DATA.length+' pincodes<br>';
- if(view!=='online')t+='<span class="sw" style="background:#e8590c"></span> Stores: <b>'+fmt(stot)+'</b> units · '+sp.filter(p=>p.q>0).length+' pincodes with sales · '+sp.length+' store locations';
+ if(view==='online'||view==='both')t+='<span class="sw" style="background:'+(view==='both'?'#1f78e0':'#2b83ba')+'"></span> Online: <b>'+total.toLocaleString()+'</b> units · '+DATA.length+' pincodes<br>';
+ if(view==='stores'||view==='both'){
+     const fStores = getFilteredStores();
+     t+='<span class="sw" style="background:#e8590c"></span> Stores: <b>'+fmt(stot)+'</b> units · '+sp.filter(p=>p.q>0).length+' pincodes with sales · '+fStores.length+' store locations<br>';
+ }
+ if(view==='beyond'||(view==='both'&&$('bys').checked))t+='<span class="sw" style="background:#9c27b0"></span> Beyond Website: <b>'+BEYOND_STORES.length+'</b> locations';
  $('tot').innerHTML=t;
  applyMarkers();
 }
+
 function layer(points,mx,ramp,scl,ovl,rp,proj,w,h,op){
  const off=document.createElement('canvas');off.width=w;off.height=h;const x=off.getContext('2d');
  x.fillStyle='#000';x.fillRect(0,0,w,h);
@@ -163,6 +225,7 @@ function layer(points,mx,ramp,scl,ovl,rp,proj,w,h,op){
  for(let i=0;i<px.length;i+=4){const j=px[i]*4;px[i]=L[j];px[i+1]=L[j+1];px[i+2]=L[j+2];px[i+3]=L[j+3]*op;}
  x.globalCompositeOperation='source-over';x.putImageData(img,0,0);return off;
 }
+
 function render(ov){
  const proj=ov.getProjection();if(!proj)return;
  const div=map.getDiv(),w=div.clientWidth,h=div.clientHeight;
@@ -172,20 +235,23 @@ function render(ov){
  const ctx=overlayCanvas.getContext('2d');
  const sp=storePoints(),smax=Math.max(1,...sp.map(p=>p.q));
  const oRamp=view==='both'?RAMPS.cool:RAMPS.orig;
- if(view!=='stores')ctx.drawImage(layer(DATA,MAXQ,oRamp,scl,ovl,rp,proj,w,h,op),0,0);
- if(view!=='online')ctx.drawImage(layer(sp,smax,RAMPS.warm,scl,ovl,rp,proj,w,h,op),0,0);
+ if(view==='online'||view==='both')ctx.drawImage(layer(DATA,MAXQ,oRamp,scl,ovl,rp,proj,w,h,op),0,0);
+ if(view==='stores'||view==='both')ctx.drawImage(layer(sp,smax,RAMPS.warm,scl,ovl,rp,proj,w,h,op),0,0);
  applyMarkers();
  updateLegend(ovl,scl,oRamp,smax);
 }
+
 function legBlock(title,sw,ramp,mx,scl,extra){
  return '<h2><span class="sw" style="background:'+sw+'"></span>'+title+'</h2><div class="legend" style="background:'+ramp.css+'"></div><div class="lg">'+
   [0,.25,.5,.75,1].map(t=>'<span>'+fmt(unnorm(t,scl,mx))+'</span>').join('')+'</div>'+(extra?'<div class="note">'+extra+'</div>':'');
 }
+
 function updateLegend(ovl,scl,oRamp,smax){
  let h='';
- if(view!=='stores')h+=legBlock('Online sales (units)',oRamp===RAMPS.cool?'#1f78e0':'#2b83ba',oRamp,MAXQ,scl,'Colour at each pincode = its own units (max '+MAXQ+').');
- if(view!=='online')h+=legBlock('Store sales (units)','#e8590c',RAMPS.warm,smax,scl,'Stores summed by pincode (max '+fmt(smax)+'). Stores with no sales are not shown.');
- h+='<div class="note">'+(ovl==='sum'?'Stacked mode: colour = combined density of nearby pincodes, so it can exceed a single pincode. Labels show the single-pincode scale.':'')+(scl==='linear'?'':' Non-linear scale: label spacing is not equal in units.')+(view==='both'?' Online and stores each use their own scale.':'')+'</div>';
+ if(view==='online'||view==='both')h+=legBlock('Online sales (units)',oRamp===RAMPS.cool?'#1f78e0':'#2b83ba',oRamp,MAXQ,scl,'Colour at each pincode = its own units (max '+MAXQ+').');
+ if(view==='stores'||view==='both')h+=legBlock('Store sales (units)','#e8590c',RAMPS.warm,smax,scl,'Stores summed by pincode (max '+fmt(smax)+'). Stores with no sales are not shown.');
+ if(view==='beyond' || (view==='both' && $('bys').checked))h+='<h2><span class="sw" style="background:#9c27b0"></span>Beyond Website Locations</h2><div class="note">These locations are not part of the heatmap data.<br><br><b>Purple</b> = Exclusive<br><b>Green</b> = Non-Exclusive</div>';
+ if(view!=='beyond')h+='<div class="note">'+(ovl==='sum'?'Stacked mode: colour = combined density of nearby pincodes, so it can exceed a single pincode. Labels show the single-pincode scale.':'')+(scl==='linear'?'':' Non-linear scale: label spacing is not equal in units.')+(view==='both'?' Online and stores each use their own scale.':'')+'</div>';
  $('legends').innerHTML=h;
 }
 </script></body></html>
