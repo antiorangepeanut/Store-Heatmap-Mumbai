@@ -151,8 +151,8 @@ function initMap(){
   
  BEYOND_STORES.forEach(b=>{
   const m=new google.maps.Marker({position:{lat:b.lat,lng:b.lng},map,title:b.name,zIndex:100,
-   icon:{path:google.maps.SymbolPath.CIRCLE,scale:7,fillOpacity:1,fillColor:b.exclusive?'#9c27b0':'#4caf50',strokeColor:'#fff',strokeWeight:2}});
-  m.addListener('click',()=>{info.setContent('<b>'+b.name+'</b><br>'+b.address+'<br>Pincode: '+b.pincode+(b.exclusive?'<br><b>Exclusive</b>':''));info.open(map,m);});
+   icon:{path:google.maps.SymbolPath.CIRCLE,scale:7,fillOpacity:1,fillColor:'#ff007f',strokeColor:'#000',strokeWeight:2}});
+  m.addListener('click',()=>{info.setContent('<b>'+b.name+'</b><br>'+b.address+'<br>Pincode: '+b.pincode);info.open(map,m);});
   beyondMarkers.push(m);
  });
 
@@ -250,7 +250,7 @@ function updateLegend(ovl,scl,oRamp,smax){
  let h='';
  if(view==='online'||view==='both')h+=legBlock('Online sales (units)',oRamp===RAMPS.cool?'#1f78e0':'#2b83ba',oRamp,MAXQ,scl,'Colour at each pincode = its own units (max '+MAXQ+').');
  if(view==='stores'||view==='both')h+=legBlock('Store sales (units)','#e8590c',RAMPS.warm,smax,scl,'Stores summed by pincode (max '+fmt(smax)+'). Stores with no sales are not shown.');
- if(view==='beyond' || (view==='both' && $('bys').checked))h+='<h2><span class="sw" style="background:#9c27b0"></span>Beyond Website Locations</h2><div class="note">These locations are not part of the heatmap data.<br><br><b>Purple</b> = Exclusive<br><b>Green</b> = Non-Exclusive</div>';
+ if(view==='beyond' || (view==='both' && $('bys').checked))h+='<h2><span class="sw" style="background:#ff007f"></span>Beyond Website Locations</h2><div class="note">These locations are not part of the heatmap data.</div>';
  if(view!=='beyond')h+='<div class="note">'+(ovl==='sum'?'Stacked mode: colour = combined density of nearby pincodes, so it can exceed a single pincode. Labels show the single-pincode scale.':'')+(scl==='linear'?'':' Non-linear scale: label spacing is not equal in units.')+(view==='both'?' Online and stores each use their own scale.':'')+'</div>';
  $('legends').innerHTML=h;
 }
